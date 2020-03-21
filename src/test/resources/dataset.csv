@@ -1,0 +1,8 @@
+SMILES,SPLIT
+CCCS(=O)c1ccc2[nH]c(=NC(=O)OC)[nH]c2c1,train
+CC(C)(C)C(=O)C(Oc1ccc(Cl)cc1)n1ccnc1,train
+CC1C2CCC(C2)C1CN(CCO)C(=O)c1ccc(Cl)cc1,test
+Cc1c(Cl)cccc1Nc1ncccc1C(=O)OCC(O)CO,train
+Cn1cnc2c1c(=O)n(CC(O)CO)c(=O)n2C,test
+CC1Oc2ccc(Cl)cc2N(CC(O)CO)C1=O,test
+O=C(C1CCCCC1)N1CC(=O)N2CCCc3ccccc3C2C1,test_scaffolds
