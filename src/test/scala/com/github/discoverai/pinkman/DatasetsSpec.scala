@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 class DatasetsSpec extends AnyFeatureSpec with Matchers {
   val spark: SparkSession = SparkSession.builder
     .appName("Pinkman Test")
-    .master("local[*]")
+    .master("local[2]")
     .getOrCreate()
 
   Feature("load dataset") {
