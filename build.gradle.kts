@@ -15,7 +15,7 @@ val sparkVersion = "2.4.5"
 
 dependencies {
     implementation("org.scala-lang:scala-library:$scalaVersion")
-    implementation("org.apache.spark:spark-sql_$scalaCompatVersion:$sparkVersion") {
+    implementation("org.apache.spark:spark-mllib_$scalaCompatVersion:$sparkVersion") {
         exclude(group = "org.apache.hadoop")
     }
     implementation("org.apache.hadoop:hadoop-client:$hadoopVersion")

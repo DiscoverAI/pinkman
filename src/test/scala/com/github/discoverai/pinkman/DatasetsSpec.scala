@@ -1,6 +1,6 @@
 package com.github.discoverai.pinkman
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -10,10 +10,10 @@ class DatasetsSpec extends AnyFeatureSpec with Matchers {
     .master("local[2]")
     .getOrCreate()
 
+  import spark.implicits._
+
   Feature("load dataset") {
     Scenario("should 3 test and 3 train datasets from file") {
-      import spark.implicits._
-
       val (actualTrain, actualTest) = Datasets.load(spark, "src/test/resources/dataset.csv")
       val expectedTrain = Seq(
         "CCCS(=O)c1ccc2[nH]c(=NC(=O)OC)[nH]c2c1",
@@ -28,6 +28,36 @@ class DatasetsSpec extends AnyFeatureSpec with Matchers {
 
       actualTrain.collect().map(_.get(0)) should contain theSameElementsAs expectedTrain
       actualTest.collect().map(_.get(0)) should contain theSameElementsAs expectedTest
+    }
+  }
+
+  Feature("normalize features") {
+    Scenario("should tokenize 3 strings containing each one string") {
+      val givenDataset = Seq("c", "1", "=").toDF("SMILES")
+
+      val actualNormalized: DataFrame = Datasets.normalize(spark, givenDataset)
+      val actual = actualNormalized.select(actualNormalized.col("SMILESTokenized"))
+      val expected: DataFrame = Seq(
+        Seq("c"),
+        Seq("1"),
+        Seq("="),
+      ).toDF("SMILESTokenized")
+
+      actual.collect() should contain theSameElementsAs expected.collect()
+    }
+
+    Scenario("should tokenize 3 strings containing each multiple strings") {
+      val givenDataset = Seq("c1=", "C1=", "C=CC").toDF("SMILES")
+
+      val actualNormalized: DataFrame = Datasets.normalize(spark, givenDataset)
+      val actual = actualNormalized.select(actualNormalized.col("SMILESTokenized"))
+      val expected: DataFrame = Seq(
+        Seq("c", "1", "="),
+        Seq("C", "1", "="),
+        Seq("C", "=", "C", "C"),
+      ).toDF("SMILESTokenized")
+
+      actual.collect() should contain theSameElementsAs expected.collect()
     }
   }
 }
