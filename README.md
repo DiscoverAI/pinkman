@@ -5,18 +5,18 @@
 
 A _Scala_ job that takes the [moses dataset](https://github.com/molecularsets/moses) and splits it into `test.csv` and `train.csv` files.
 
-It uses a [azure blob storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction) for storing datasets.
+It uses a s3 bucket for storing datasets.
 
 ## Configuration
 Please set the following environment variables accordingly:
 ```dotenv
-AZURE_STORAGE_ACCOUNT_NAME="<azure storage account name>"
-AZURE_STORAGE_KEY="<azure storage key>"
-AZURE_STORAGE_CONTAINER_NAME="<azure storage container name>"
+AWS_ACCESS_KEY_ID="<aws access key id>"
+AWS_SECRET_ACCESS_KEY="<aws secret access key>"
+S3_BUCKET_NAME="<s3 bucket name that contains the moses dataset>"
 ```
 
 ## Input
 It assumes that there is a moses.csv file lying in the root of your container of your azure storage.
 
 ## Output
-It produces `train.csv` `test.csv` files locally
+It produces `train.csv` `test.csv` files inside a `pinkman` folder on the specified s3 bucket.

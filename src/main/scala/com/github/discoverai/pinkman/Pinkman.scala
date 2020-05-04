@@ -9,11 +9,8 @@ object Pinkman extends LazyLogging {
   def main(args: Array[String]): Unit = {
     logger.info("Start loading spark")
     val sparkConf = new SparkConf()
-      .set("fs.azure", "org.apache.hadoop.fs.azure.NativeAzureFileSystem")
-      .set(
-        s"fs.azure.account.key.${System.getenv("AZURE_STORAGE_ACCOUNT_NAME")}.blob.core.windows.net",
-        System.getenv("AZURE_STORAGE_KEY")
-      )
+      .set("fs.s3a.access.key", System.getenv("AWS_ACCESS_KEY_ID"))
+      .set("fs.s3a.secret.key", System.getenv("AWS_SECRET_ACCESS_KEY"))
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     val spark: SparkSession = SparkSession.builder
       .appName("pinkman")
@@ -23,7 +20,7 @@ object Pinkman extends LazyLogging {
     logger.info("Done loading spark")
 
     logger.info("Start loading datasets")
-    val baseUri = s"wasbs://${System.getenv("AZURE_STORAGE_CONTAINER_NAME")}@${System.getenv("AZURE_STORAGE_ACCOUNT_NAME")}.blob.core.windows.net"
+    val baseUri = s"s3a://${System.getenv("S3_BUCKET_NAME")}"
     val (train, test) = Datasets.load(spark, s"$baseUri/moses.csv")
     logger.info(s"Train dataset size: ${train.count()}")
     logger.info(s"Test dataset size: ${test.count()}")
@@ -35,13 +32,13 @@ object Pinkman extends LazyLogging {
       .coalesce(1)
       .write
       .mode("overwrite")
-      .csv("./src/main/resources/train.csv")
+      .csv(s"$baseUri/pinkman/train.csv")
     test
       .orderBy(rand())
       .coalesce(1)
       .write
       .mode("overwrite")
-      .csv("./src/main/resources/test.csv")
+      .csv(s"$baseUri/pinkman/test.csv")
     logger.info("Done persisting datasets")
     spark.stop()
   }
