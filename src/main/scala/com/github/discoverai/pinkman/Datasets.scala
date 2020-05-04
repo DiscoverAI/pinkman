@@ -20,15 +20,15 @@ object Datasets {
       })
   }
 
-    def index(dictionary: Dataset[DictionaryEntry])(tokenizedSmiles: Seq[String]): Seq[Double] = {
-      val frames: Seq[Double] = tokenizedSmiles.map {
-        molecularInput =>
-          dictionary
-            .where(col("molecularInput") === molecularInput)
-            .select("index").
-      }
-      frames
+  def index(dictionary: Dataset[DictionaryEntry])(tokenizedSmiles: Seq[String]): Seq[Double] = {
+    val frames: Seq[Double] = tokenizedSmiles.map {
+      molecularInput =>
+        dictionary
+          .where(col("molecularInput") === molecularInput)
+          .select("index").collect().head.getDouble(0)
     }
+    frames
+  }
 
   def normalize(spark: SparkSession, dataset: DataFrame, dictionary: Dataset[DictionaryEntry]): DataFrame = {
     val tokenizer = new WordSplitter()
@@ -40,10 +40,10 @@ object Datasets {
 
     val indexed = udf(index(dictionary)(_))
     val indexedDataset = tokenizedDataset
-      .withColumn("features", indexed(col("SMILESTokenized")))
+      .withColumn("features", indexed(col("tokenizedSMILES")))
       .select("features")
 
-    tokenizedDataset.toDF()
+    indexedDataset
   }
 
   def load(spark: SparkSession, datasetFilePath: String): (DataFrame, DataFrame) = {
