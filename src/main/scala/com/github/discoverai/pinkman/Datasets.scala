@@ -4,12 +4,16 @@ import org.apache.spark.sql._
 import org.apache.spark.sql.functions.{explode, lit, udf, col}
 
 object Datasets {
+  private val smilesColumnName = "SMILES"
+  private val tokenColumnName = "tokenizedSMILES"
+  private val molecularInputColumnName = "molecularInput"
+
   def dictionary(spark: SparkSession, tokenizedDataset: Dataset[TokenizedSMILES]): Dataset[DictionaryEntry] = {
     val explodedDataset = tokenizedDataset
-      .withColumn("molecularInput", explode(tokenizedDataset("tokenizedSMILES")))
+      .withColumn(molecularInputColumnName, explode(tokenizedDataset(tokenColumnName)))
       .withColumn("count", lit(1))
     val groupedByCount: Dataset[Row] = explodedDataset
-      .groupBy(explodedDataset.col("molecularInput"))
+      .groupBy(explodedDataset.col(molecularInputColumnName))
       .count()
       .orderBy("count")
 
@@ -24,23 +28,23 @@ object Datasets {
     val frames: Seq[Double] = tokenizedSmiles.map {
       molecularInput =>
         dictionary
-          .where(col("molecularInput") === molecularInput)
+          .where(col(molecularInput) === molecularInput)
           .select("index").collect().head.getDouble(0)
     }
     frames
   }
 
-  def normalize(spark: SparkSession, dataset: DataFrame, dictionary: Dataset[DictionaryEntry]): DataFrame = {
+  def normalize(dataset: DataFrame, dictionary: Dataset[DictionaryEntry]): DataFrame = {
     val tokenizer = new WordSplitter()
-      .setInputCol("SMILES")
-      .setOutputCol("tokenizedSMILES")
+      .setInputCol(smilesColumnName)
+      .setOutputCol(tokenColumnName)
     implicit val tokenizedSMILESEncoder: Encoder[TokenizedSMILES] = Encoders.product
-    val tokenizedDataset: Dataset[TokenizedSMILES] = tokenizer.transform(dataset).select("tokenizedSMILES").as[TokenizedSMILES]
+    val tokenizedDataset: Dataset[TokenizedSMILES] = tokenizer.transform(dataset).select(tokenColumnName).as[TokenizedSMILES]
     tokenizedDataset.show()
 
     val indexed = udf(index(dictionary)(_))
     val indexedDataset = tokenizedDataset
-      .withColumn("features", indexed(col("tokenizedSMILES")))
+      .withColumn("features", indexed(col(tokenColumnName)))
       .select("features")
 
     indexedDataset
@@ -52,10 +56,10 @@ object Datasets {
       .options(Map("header" -> "true"))
       .csv(datasetFilePath)
     val trainDataset = dataset
-      .select(dataset.col("SMILES"))
+      .select(dataset.col(smilesColumnName))
       .where(dataset.col("SPLIT").===("train"))
     val testDataset = dataset
-      .select(dataset.col("SMILES"))
+      .select(dataset.col(smilesColumnName))
       .where(dataset.col("SPLIT").===("test"))
     (trainDataset, testDataset)
   }
