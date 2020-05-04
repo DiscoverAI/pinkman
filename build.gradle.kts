@@ -18,6 +18,9 @@ dependencies {
     implementation("org.apache.spark:spark-mllib_$scalaCompatVersion:$sparkVersion") {
         exclude(group = "org.apache.hadoop")
     }
+    implementation("org.apache.spark:spark-sql_$scalaCompatVersion:$sparkVersion") {
+        exclude(group = "org.apache.hadoop")
+    }
     implementation("org.apache.hadoop:hadoop-client:$hadoopVersion")
     implementation("org.apache.hadoop:hadoop-azure:$hadoopVersion")
     implementation("com.typesafe.scala-logging:scala-logging_$scalaCompatVersion:3.9.2")

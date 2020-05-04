@@ -1,6 +1,6 @@
 package com.github.discoverai.pinkman
 
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.SparkSession
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -13,7 +13,7 @@ class DatasetsSpec extends AnyFeatureSpec with Matchers {
   import spark.implicits._
 
   Feature("load dataset") {
-    Scenario("should 3 test and 3 train datasets from file") {
+    Scenario("should return 3 test and 3 train datasets from file") {
       val (actualTrain, actualTest) = Datasets.load(spark, "src/test/resources/dataset.csv")
       val expectedTrain = Seq(
         "CCCS(=O)c1ccc2[nH]c(=NC(=O)OC)[nH]c2c1",
@@ -31,33 +31,73 @@ class DatasetsSpec extends AnyFeatureSpec with Matchers {
     }
   }
 
-  Feature("normalize features") {
-    Scenario("should tokenize 3 strings containing each one string") {
-      val givenDataset = Seq("c", "1", "=").toDF("SMILES")
+  Feature("create dictionary") {
+    Scenario("3 characters that each appear once") {
+      val givenDataset = Seq(
+        TokenizedSMILES(Seq("c")),
+        TokenizedSMILES(Seq("1")),
+        TokenizedSMILES(Seq("=")),
+      ).toDS()
 
-      val actualNormalized: DataFrame = Datasets.normalize(spark, givenDataset)
-      val actual = actualNormalized.select(actualNormalized.col("SMILESTokenized"))
-      val expected: DataFrame = Seq(
-        Seq("c"),
-        Seq("1"),
-        Seq("="),
-      ).toDF("SMILESTokenized")
+      val actual = Datasets.dictionary(spark, givenDataset)
+      val expected = Seq(
+        DictionaryEntry("c", 1, 2.0),
+        DictionaryEntry("1", 1, 3.0),
+        DictionaryEntry("=", 1, 1.0),
+      ).toDS()
 
       actual.collect() should contain theSameElementsAs expected.collect()
     }
 
-    Scenario("should tokenize 3 strings containing each multiple strings") {
-      val givenDataset = Seq("c1=", "C1=", "C=CC").toDF("SMILES")
+    Scenario("3 characters witch increasing frequency") {
+      val givenDataset = Seq(
+        TokenizedSMILES(Seq("c", "=")),
+        TokenizedSMILES(Seq("1", "c", "=")),
+        TokenizedSMILES(Seq("=", "=", "=")),
+      ).toDS()
 
-      val actualNormalized: DataFrame = Datasets.normalize(spark, givenDataset)
-      val actual = actualNormalized.select(actualNormalized.col("SMILESTokenized"))
-      val expected: DataFrame = Seq(
-        Seq("c", "1", "="),
-        Seq("C", "1", "="),
-        Seq("C", "=", "C", "C"),
-      ).toDF("SMILESTokenized")
+      val actual = Datasets.dictionary(spark, givenDataset)
+      val expected = Seq(
+        DictionaryEntry("1", 1, 1.0),
+        DictionaryEntry("c", 2, 2.0),
+        DictionaryEntry("=", 5, 3.0),
+      ).toDS()
 
       actual.collect() should contain theSameElementsAs expected.collect()
     }
   }
+
+  //  Feature("normalize features") {
+  //    Scenario("should normalize 3 strings containing each one string") {
+  //      val givenDataset = Seq("c", "1", "=").toDF("SMILES")
+  //      val givenDictionary = Seq(
+  //        DictionaryEntry("1", 3, 2.0),
+  //        DictionaryEntry("=", 5, 5.0),
+  //        DictionaryEntry("c", 4, 3.0),
+  //      ).toDS()
+  //
+  //      val actual: DataFrame = Datasets.normalize(spark, givenDataset, givenDictionary)
+  //      val expected: DataFrame = Seq(
+  //        Seq(3.0),
+  //        Seq(2.0),
+  //        Seq(5.0),
+  //      ).toDF("features")
+  //
+  //      actual.collect() should contain theSameElementsAs expected.collect()
+  //    }
+  //
+  //    //    Scenario("should tokenize 3 strings containing each multiple strings") {
+  //    //      val givenDataset = Seq("c1=", "C1=", "C=CC").toDF("SMILES")
+  //    //
+  //    //      val actualNormalized: DataFrame = Datasets.normalize(spark, givenDataset)
+  //    //      val actual = actualNormalized.select(actualNormalized.col("SMILESTokenized"))
+  //    //      val expected: DataFrame = Seq(
+  //    //        Seq("c", "1", "="),
+  //    //        Seq("C", "1", "="),
+  //    //        Seq("C", "=", "C", "C"),
+  //    //      ).toDF("SMILESTokenized")
+  //    //
+  //    //      actual.collect() should contain theSameElementsAs expected.collect()
+  //    //    }
+  //  }
 }
