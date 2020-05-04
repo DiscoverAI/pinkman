@@ -1,7 +1,7 @@
 package com.github.discoverai.pinkman
 
 import org.apache.spark.sql._
-import org.apache.spark.sql.functions.{explode, lit}
+import org.apache.spark.sql.functions.{explode, lit, udf, col}
 
 object Datasets {
   def dictionary(spark: SparkSession, tokenizedDataset: Dataset[TokenizedSMILES]): Dataset[DictionaryEntry] = {
@@ -20,31 +20,31 @@ object Datasets {
       })
   }
 
-  //  def index(dictionary: Dataset[Dictionary])(tokenizedSmiles: Seq[String]): Seq[Double] = {
-  //    val frames: Seq[Double] = tokenizedSmiles.map {
-  //      molecularInput =>
-  //        dictionary
-  //          .where(col("molecularInput") === molecularInput)
-  //          .select("index").as[Double]
-  //    }
-  //    frames
-  //  }
+    def index(dictionary: Dataset[DictionaryEntry])(tokenizedSmiles: Seq[String]): Seq[Double] = {
+      val frames: Seq[Double] = tokenizedSmiles.map {
+        molecularInput =>
+          dictionary
+            .where(col("molecularInput") === molecularInput)
+            .select("index").
+      }
+      frames
+    }
 
-  //  def normalize(spark: SparkSession, dataset: DataFrame, dictionary: Dataset[DictionaryEntry]): DataFrame = {
-  //    val tokenizer = new WordSplitter()
-  //      .setInputCol("SMILES")
-  //      .setOutputCol("tokenizedSMILES")
-  //    implicit val tokenizedSMILESEncoder: Encoder[TokenizedSMILES] = Encoders.product
-  //    val tokenizedDataset = tokenizer.transform(dataset).select("tokenizedSMILES").as[TokenizedSMILES]
-  //    tokenizedDataset.show()
-  //
-  //    //    val indexed = udf(index(dictionary)(_))
-  //    //    val indexedDataset = tokenizedDataset
-  //    //      .withColumn("features", indexed(col("SMILESTokenized")))
-  //    //      .select("features")
-  //
-  //    tokenizedDataset.toDF()
-  //  }
+  def normalize(spark: SparkSession, dataset: DataFrame, dictionary: Dataset[DictionaryEntry]): DataFrame = {
+    val tokenizer = new WordSplitter()
+      .setInputCol("SMILES")
+      .setOutputCol("tokenizedSMILES")
+    implicit val tokenizedSMILESEncoder: Encoder[TokenizedSMILES] = Encoders.product
+    val tokenizedDataset: Dataset[TokenizedSMILES] = tokenizer.transform(dataset).select("tokenizedSMILES").as[TokenizedSMILES]
+    tokenizedDataset.show()
+
+    val indexed = udf(index(dictionary)(_))
+    val indexedDataset = tokenizedDataset
+      .withColumn("features", indexed(col("SMILESTokenized")))
+      .select("features")
+
+    tokenizedDataset.toDF()
+  }
 
   def load(spark: SparkSession, datasetFilePath: String): (DataFrame, DataFrame) = {
     val dataset = spark
