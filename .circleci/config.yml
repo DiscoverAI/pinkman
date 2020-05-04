@@ -3,7 +3,7 @@ version: 2.1
 openjdk13-docker-image: &openjdk13-docker-image
   working_directory: ~/repo
   docker:
-  - image: circleci/openjdk:13-jdk
+  - image: openjdk:13-jdk
     environment:
       JVM_OPTS: -Xmx3200m
       TERM: dumb
