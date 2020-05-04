@@ -1,0 +1,15 @@
+Resources:
+  DatalakeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: "Private"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+      BucketName: "sars-cov-2-25309b4013524"
+      Tags:
+        - Key: Project
+          Value: "SARS-CoV-2"
+      VersioningConfiguration:
+        Status: "Enabled"
