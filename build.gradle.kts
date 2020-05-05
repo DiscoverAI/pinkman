@@ -24,6 +24,7 @@ dependencies {
     implementation("org.apache.hadoop:hadoop-client:$hadoopVersion")
     implementation("org.apache.hadoop:hadoop-aws:$hadoopVersion")
     implementation("com.amazonaws:aws-java-sdk-bundle:1.11.774")
+    implementation("org.mlflow:mlflow-client:1.8.0")
     implementation("com.typesafe.scala-logging:scala-logging_$scalaCompatVersion:3.9.2")
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("org.slf4j:log4j-over-slf4j:1.7.30")
