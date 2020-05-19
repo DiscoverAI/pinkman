@@ -3,7 +3,7 @@
 >
 > -- Jesse Bruce Pinkman (Breaking Bad)
 
-A _Scala_ job that takes the [moses dataset](https://github.com/molecularsets/moses) and splits it into `test.parquet` and `train.parquet` files.
+A _Scala_ job that takes the [moses dataset](https://github.com/molecularsets/moses) and splits it into `test.csv` and `train.csv` files.
 
 It uses a s3 bucket for storing datasets.
 
@@ -20,4 +20,4 @@ MLFLOW_TRACKING_URI="<url of the ml flow tracking server>"
 It assumes that there is a moses.csv file lying in the root of your container of your azure storage.
 
 ## Output
-It produces `train.parquet` `test.parquet` files inside a `pinkman` folder on the specified s3 bucket.
+It produces `train.csv` `test.csv` files inside a `pinkman` folder on the specified s3 bucket.
