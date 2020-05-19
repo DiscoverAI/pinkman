@@ -49,13 +49,13 @@ object Pinkman extends LazyLogging {
       .coalesce(1)
       .write
       .mode("overwrite")
-      .parquet(s"$outputPath/train")
+      .csv(s"$outputPath/train.csv")
     test
       .orderBy(rand())
       .coalesce(1)
       .write
       .mode("overwrite")
-      .parquet(s"$outputPath/test.csv")
+      .csv(s"$outputPath/test.csv")
     logger.info("Done persisting datasets")
     run.endRun()
     spark.stop()
