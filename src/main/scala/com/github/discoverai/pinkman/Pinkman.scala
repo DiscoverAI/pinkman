@@ -18,7 +18,7 @@ object Pinkman extends LazyLogging {
       .master("local[*]")
       .config(sparkConf)
       .getOrCreate()
-    val mlflowContext = new MlflowContext("file:/./.mlflow")
+    val mlflowContext = new MlflowContext(System.getenv("MLFLOW_TRACKING_URI"))
     val client = mlflowContext.getClient
     val experimentOpt = client.getExperimentByName("pinkman");
     if (!experimentOpt.isPresent) {
@@ -49,13 +49,13 @@ object Pinkman extends LazyLogging {
       .coalesce(1)
       .write
       .mode("overwrite")
-      .csv(s"$outputPath/train.csv")
+      .parquet(s"$outputPath/train")
     test
       .orderBy(rand())
       .coalesce(1)
       .write
       .mode("overwrite")
-      .csv(s"$outputPath/test.csv")
+      .parquet(s"$outputPath/test.csv")
     logger.info("Done persisting datasets")
     run.endRun()
     spark.stop()
