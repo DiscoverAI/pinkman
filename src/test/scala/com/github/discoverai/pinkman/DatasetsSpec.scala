@@ -76,7 +76,7 @@ class DatasetsSpec extends AnyFeatureSpec with Matchers {
         DictionaryEntry("c", 4, 3.0),
       ).toDS()
 
-      val actual = Datasets.normalize(spark, givenDataset, givenDictionary)
+      val actual = Datasets.normalize(givenDataset, givenDictionary)
       val expected = Seq(
         Seq(3.0),
         Seq(2.0),
@@ -95,7 +95,7 @@ class DatasetsSpec extends AnyFeatureSpec with Matchers {
         DictionaryEntry("=", 5, 4.0),
       ).toDS()
 
-      val actual = Datasets.normalize(spark, givenDataset, givenDictionary)
+      val actual = Datasets.normalize(givenDataset, givenDictionary)
       val expected = Seq(
         Seq(3.0, 2.0, 4.0),
         Seq(1.0, 2.0, 4.0),
