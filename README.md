@@ -1,4 +1,7 @@
 # Pinkman
+[![CircleCI](https://circleci.com/gh/DiscoverAI/pinkman.svg?style=shield)](https://circleci.com/gh/DiscoverAI/pinkman)
+[![GitHub license](https://img.shields.io/github/license/DiscoverAI/pinkman)](https://github.com/DiscoverAI/pinkman/blob/master/LICENSE)
+
 > Yeah Mr. White! You really do have a plan! Yeah science!
 >
 > -- Jesse Bruce Pinkman (Breaking Bad)
