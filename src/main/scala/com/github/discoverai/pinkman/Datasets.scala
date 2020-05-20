@@ -26,9 +26,9 @@ object Datasets {
 
   def index(dictionary: Dataset[DictionaryEntry])(tokenizedSmiles: Seq[String]): Seq[Double] = {
     val frames: Seq[Double] = tokenizedSmiles.map {
-      molecularInput =>
+      tokenizedSMILE =>
         dictionary
-          .where(col(molecularInput) === molecularInput)
+          .where(col("molecularInput") === tokenizedSMILE)
           .select("index").collect().head.getDouble(0)
     }
     frames
