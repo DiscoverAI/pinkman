@@ -42,3 +42,15 @@ configurations {
 application {
     mainClassName = "com.github.discoverai.pinkman.Pinkman"
 }
+
+tasks.register<Jar>("uberJar") {
+    isZip64 = true
+    archiveClassifier.set("uber")
+
+    from(sourceSets.main.get().output)
+
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
+}
