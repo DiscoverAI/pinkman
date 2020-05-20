@@ -1,5 +1,6 @@
 package com.github.discoverai.pinkman
 
+import com.github.discoverai.pinkman.Pinkman.DictionaryDataset
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions.{col, explode, lit, udf}
@@ -9,7 +10,7 @@ object Datasets {
   private val tokenColumnName = "tokenizedSMILES"
   private val molecularInputColumnName = "molecularInput"
 
-  def dictionary(spark: SparkSession, tokenizedDataset: Dataset[TokenizedSMILES]): Dataset[DictionaryEntry] = {
+  def dictionary(spark: SparkSession, tokenizedDataset: Dataset[TokenizedSMILES]): DictionaryDataset = {
     val explodedDataset = tokenizedDataset
       .withColumn(molecularInputColumnName, explode(tokenizedDataset(tokenColumnName)))
       .withColumn("count", lit(1))
@@ -47,6 +48,14 @@ object Datasets {
       .select("features")
 
     indexedDataset
+  }
+
+  def stringifyVectors(normalizedDataset: DataFrame): DataFrame = {
+    val stringify = udf((row: Seq[Double]) => row.mkString(","))
+    normalizedDataset
+      .withColumn("stringifiedFeatures", stringify(col("features")))
+      .drop("features")
+      .withColumnRenamed("stringifiedFeatures", "features")
   }
 
   def load(spark: SparkSession, datasetFilePath: String): (DataFrame, DataFrame) = {

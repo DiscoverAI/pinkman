@@ -1,5 +1,7 @@
 package com.github.discoverai.pinkman
 
+import org.apache.spark.sql.DataFrame
+
 class DatasetsSpec extends UnitTest with LocalSparkContext {
 
   import spark.implicits._
@@ -163,6 +165,42 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
         Seq(3.0, 2.0, 4.0),
         Seq(0.0, 2.0, 4.0),
         Seq(0.0, 4.0, 0.0),
+      ).toDF("features")
+
+      actual.collect() should contain theSameElementsAs expected.collect()
+    }
+  }
+
+  Feature("stringify features") {
+    Scenario("one feature available") {
+      val givenDataset = Seq(
+        Seq(3.0),
+        Seq(1.0),
+        Seq(1.0),
+      ).toDF("features")
+
+      val actual: DataFrame = Datasets.stringifyVectors(givenDataset)
+      val expected = Seq(
+        "3.0",
+        "1.0",
+        "1.0",
+      ).toDF("features")
+
+      actual.collect() should contain theSameElementsAs expected.collect()
+    }
+
+    Scenario("multiple features available") {
+      val givenDataset = Seq(
+        Seq(3.0, 2.0, 4.0),
+        Seq(1.0, 2.0, 4.0),
+        Seq(1.0, 4.0, 1.0),
+      ).toDF("features")
+
+      val actual: DataFrame = Datasets.stringifyVectors(givenDataset)
+      val expected = Seq(
+        "3.0,2.0,4.0",
+        "1.0,2.0,4.0",
+        "1.0,4.0,1.0",
       ).toDF("features")
 
       actual.collect() should contain theSameElementsAs expected.collect()
