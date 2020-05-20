@@ -1,7 +1,7 @@
 package com.github.discoverai.pinkman
 
 import org.apache.spark.sql._
-import org.apache.spark.sql.functions.{explode, lit, udf, col}
+import org.apache.spark.sql.functions.{col, explode, lit, udf}
 
 object Datasets {
   private val smilesColumnName = "SMILES"
@@ -24,6 +24,14 @@ object Datasets {
       })
   }
 
+  def tokenize(dataset: DataFrame): Dataset[TokenizedSMILES] = {
+    val tokenizer = new WordSplitter()
+      .setInputCol(smilesColumnName)
+      .setOutputCol(tokenColumnName)
+    implicit val tokenizedSMILESEncoder: Encoder[TokenizedSMILES] = Encoders.product
+    tokenizer.transform(dataset).select(tokenColumnName).as[TokenizedSMILES]
+  }
+
   def index(dictionary: Dataset[DictionaryEntry])(tokenizedSmiles: Seq[String]): Seq[Double] = {
     val frames: Seq[Double] = tokenizedSmiles.map {
       tokenizedSMILE =>
@@ -34,14 +42,7 @@ object Datasets {
     frames
   }
 
-  def normalize(dataset: DataFrame, dictionary: Dataset[DictionaryEntry]): DataFrame = {
-    val tokenizer = new WordSplitter()
-      .setInputCol(smilesColumnName)
-      .setOutputCol(tokenColumnName)
-    implicit val tokenizedSMILESEncoder: Encoder[TokenizedSMILES] = Encoders.product
-    val tokenizedDataset: Dataset[TokenizedSMILES] = tokenizer.transform(dataset).select(tokenColumnName).as[TokenizedSMILES]
-    tokenizedDataset.show()
-
+  def normalize(tokenizedDataset: Dataset[TokenizedSMILES], dictionary: Dataset[DictionaryEntry]): DataFrame = {
     val indexed = udf(index(dictionary)(_))
     val indexedDataset = tokenizedDataset
       .withColumn("features", indexed(col(tokenColumnName)))

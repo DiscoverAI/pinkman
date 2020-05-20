@@ -67,9 +67,54 @@ class DatasetsSpec extends AnyFeatureSpec with Matchers {
     }
   }
 
+  Feature("tokenize") {
+    Scenario("1 character each") {
+      val givenDataset = Seq("c", "1", "=").toDF("SMILES")
+
+      val actual = Datasets.tokenize(givenDataset)
+      val expected = Seq(
+        TokenizedSMILES(Seq("c")),
+        TokenizedSMILES(Seq("1")),
+        TokenizedSMILES(Seq("=")),
+      ).toDS()
+
+      actual.collect() should contain theSameElementsAs expected.collect()
+    }
+
+    Scenario("3 characters each") {
+      val givenDataset = Seq("caa", "11f", "=b3").toDF("SMILES")
+
+      val actual = Datasets.tokenize(givenDataset)
+      val expected = Seq(
+        TokenizedSMILES(Seq("c", "a", "a")),
+        TokenizedSMILES(Seq("1", "1", "f")),
+        TokenizedSMILES(Seq("=", "b", "3")),
+      ).toDS()
+
+      actual.collect() should contain theSameElementsAs expected.collect()
+    }
+
+    Scenario("multiple characters each") {
+      val givenDataset = Seq("c=(a)", "11f", "=").toDF("SMILES")
+
+      val actual = Datasets.tokenize(givenDataset)
+      val expected = Seq(
+        TokenizedSMILES(Seq("c", "=", "(", "a", ")")),
+        TokenizedSMILES(Seq("1", "1", "f")),
+        TokenizedSMILES(Seq("=")),
+      ).toDS()
+
+      actual.collect() should contain theSameElementsAs expected.collect()
+    }
+  }
+
   Feature("normalize features") {
     Scenario("should normalize 3 strings containing each one string") {
-      val givenDataset = Seq("c", "1", "=").toDF("SMILES")
+      val givenDataset = Seq(
+        TokenizedSMILES(Seq("c")),
+        TokenizedSMILES(Seq("1")),
+        TokenizedSMILES(Seq("=")),
+      ).toDS()
       val givenDictionary = Seq(
         DictionaryEntry("1", 3, 2.0),
         DictionaryEntry("=", 5, 5.0),
@@ -87,7 +132,11 @@ class DatasetsSpec extends AnyFeatureSpec with Matchers {
     }
 
     Scenario("should normalize 3 strings containing each 3 strings") {
-      val givenDataset = Seq("c1=", "C1=", "C=C").toDF("SMILES")
+      val givenDataset = Seq(
+        TokenizedSMILES(Seq("c", "1", "=")),
+        TokenizedSMILES(Seq("C", "1", "=")),
+        TokenizedSMILES(Seq("C", "=", "C")),
+      ).toDS()
       val givenDictionary = Seq(
         DictionaryEntry("C", 4, 1.0),
         DictionaryEntry("1", 3, 2.0),
