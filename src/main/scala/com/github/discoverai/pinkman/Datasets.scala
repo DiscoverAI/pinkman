@@ -1,5 +1,6 @@
 package com.github.discoverai.pinkman
 
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions.{col, explode, lit, udf}
 
@@ -32,18 +33,15 @@ object Datasets {
     tokenizer.transform(dataset).select(tokenColumnName).as[TokenizedSMILES]
   }
 
-  def index(dictionary: Dataset[DictionaryEntry])(tokenizedSmiles: Seq[String]): Seq[Double] = {
-    val frames: Seq[Double] = tokenizedSmiles.map {
+  def index(dictionary: Broadcast[Map[String, Double]])(tokenizedSmiles: Seq[String]): Seq[Double] = {
+    tokenizedSmiles.map {
       tokenizedSMILE =>
-        dictionary
-          .where(col("molecularInput") === tokenizedSMILE)
-          .select("index").collect().head.getDouble(0)
+        dictionary.value.getOrElse(tokenizedSMILE, 0.0)
     }
-    frames
   }
 
-  def normalize(tokenizedDataset: Dataset[TokenizedSMILES], dictionary: Dataset[DictionaryEntry]): DataFrame = {
-    val indexed = udf(index(dictionary)(_))
+  def normalize(tokenizedDataset: Dataset[TokenizedSMILES], dictionary: Broadcast[Map[String, Double]]): DataFrame = {
+    val indexed = udf[Seq[Double], Seq[String]](index(dictionary)(_))
     val indexedDataset = tokenizedDataset
       .withColumn("features", indexed(col(tokenColumnName)))
       .select("features")

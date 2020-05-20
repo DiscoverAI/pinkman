@@ -1,14 +1,6 @@
 package com.github.discoverai.pinkman
 
-import org.apache.spark.sql.SparkSession
-import org.scalatest.featurespec.AnyFeatureSpec
-import org.scalatest.matchers.should.Matchers
-
-class DatasetsSpec extends AnyFeatureSpec with Matchers {
-  val spark: SparkSession = SparkSession.builder
-    .appName("Pinkman Test")
-    .master("local[2]")
-    .getOrCreate()
+class DatasetsSpec extends UnitTest with LocalSparkContext {
 
   import spark.implicits._
 
@@ -115,11 +107,11 @@ class DatasetsSpec extends AnyFeatureSpec with Matchers {
         TokenizedSMILES(Seq("1")),
         TokenizedSMILES(Seq("=")),
       ).toDS()
-      val givenDictionary = Seq(
-        DictionaryEntry("1", 3, 2.0),
-        DictionaryEntry("=", 5, 5.0),
-        DictionaryEntry("c", 4, 3.0),
-      ).toDS()
+      val givenDictionary = spark.sparkContext.broadcast(Map(
+        "1" -> 2.0,
+        "=" -> 5.0,
+        "c" -> 3.0,
+      ))
 
       val actual = Datasets.normalize(givenDataset, givenDictionary)
       val expected = Seq(
@@ -137,18 +129,40 @@ class DatasetsSpec extends AnyFeatureSpec with Matchers {
         TokenizedSMILES(Seq("C", "1", "=")),
         TokenizedSMILES(Seq("C", "=", "C")),
       ).toDS()
-      val givenDictionary = Seq(
-        DictionaryEntry("C", 4, 1.0),
-        DictionaryEntry("1", 3, 2.0),
-        DictionaryEntry("c", 4, 3.0),
-        DictionaryEntry("=", 5, 4.0),
-      ).toDS()
+      val givenDictionary = spark.sparkContext.broadcast(Map(
+        "C" -> 1.0,
+        "1" -> 2.0,
+        "c" -> 3.0,
+        "=" -> 4.0,
+      ))
 
       val actual = Datasets.normalize(givenDataset, givenDictionary)
       val expected = Seq(
         Seq(3.0, 2.0, 4.0),
         Seq(1.0, 2.0, 4.0),
         Seq(1.0, 4.0, 1.0),
+      ).toDF("features")
+
+      actual.collect() should contain theSameElementsAs expected.collect()
+    }
+
+    Scenario("should normalize 3 strings containing each 3 strings and index missing token with 0.0") {
+      val givenDataset = Seq(
+        TokenizedSMILES(Seq("c", "1", "=")),
+        TokenizedSMILES(Seq("C", "1", "=")),
+        TokenizedSMILES(Seq("C", "=", "C")),
+      ).toDS()
+      val givenDictionary = spark.sparkContext.broadcast(Map(
+        "1" -> 2.0,
+        "c" -> 3.0,
+        "=" -> 4.0,
+      ))
+
+      val actual = Datasets.normalize(givenDataset, givenDictionary)
+      val expected = Seq(
+        Seq(3.0, 2.0, 4.0),
+        Seq(0.0, 2.0, 4.0),
+        Seq(0.0, 4.0, 0.0),
       ).toDF("features")
 
       actual.collect() should contain theSameElementsAs expected.collect()
