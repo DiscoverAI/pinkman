@@ -63,7 +63,6 @@ object Pinkman extends LazyLogging {
     val trainDatasetStringified = Datasets.stringifyVectors(normalizedTrainDataset)
     val testDatasetStringified = Datasets.stringifyVectors(normalizedTestDataset)
     persistDataset(trainDatasetStringified, s"$outputPath/train.csv")
-    run.logArtifact(Paths.get(s"$outputPath/train.csv"))
     persistDataset(testDatasetStringified, s"$outputPath/test.csv")
   }
 
