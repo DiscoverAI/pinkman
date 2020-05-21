@@ -75,7 +75,6 @@ object Pinkman extends LazyLogging {
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     val spark: SparkSession = SparkSession.builder
       .appName("pinkman")
-      .master("local[*]")
       .config(sparkConf)
       .getOrCreate()
     val mlflowContext = new MlflowContext(System.getenv("MLFLOW_TRACKING_URI"))
