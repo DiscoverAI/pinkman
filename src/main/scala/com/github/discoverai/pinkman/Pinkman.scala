@@ -1,7 +1,5 @@
 package com.github.discoverai.pinkman
 
-import java.nio.file.Paths
-
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.SparkConf
 import org.apache.spark.broadcast.Broadcast
@@ -44,7 +42,6 @@ object Pinkman extends LazyLogging {
   def persistDataset(dataset: DataFrame, outputPath: String): Unit = {
     dataset
       .orderBy(rand())
-      .coalesce(1)
       .write
       .mode("overwrite")
       .csv(outputPath)
