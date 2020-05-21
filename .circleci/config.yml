@@ -3,10 +3,10 @@ version: 2.1
 openjdk13-docker-image: &openjdk13-docker-image
   working_directory: ~/repo
   docker:
-  - image: openjdk:13-jdk
-    environment:
-      JVM_OPTS: -Xmx3200m
-      TERM: dumb
+    - image: openjdk:13-jdk
+      environment:
+        JVM_OPTS: -Xmx3200m
+        TERM: dumb
 
 commands:
   restore-gradle-cache:
@@ -29,23 +29,40 @@ commands:
             - ~/.gradle/caches
           key: v1-gradle-cache-{{ checksum "build.gradle.kts" }}
 
+orbs:
+  aws-cli: circleci/aws-cli@1.0.0
+
 jobs:
   test:
     <<: *openjdk13-docker-image
     steps:
-    - checkout
-    - restore-gradle-cache
-    - run: ./gradlew clean classes testClasses
-    - save-gradle-cache
-    - run: ./gradlew check
-    - store_test_results:
-        path: build/test-results/test
-    - store_artifacts:
-        path: build/test-results/test
-        when: always
+      - checkout
+      - restore-gradle-cache
+      - run: ./gradlew clean classes testClasses
+      - save-gradle-cache
+      - run: ./gradlew check
+      - store_test_results:
+          path: build/test-results/test
+      - store_artifacts:
+          path: build/test-results/test
+          when: always
+
+  deploy-jar:
+    <<: *openjdk13-docker-image
+    steps:
+      - checkout
+      - restore-gradle-cache
+      - run: ./gradlew clean classes testClasses
+      - save-gradle-cache
+      - run: ./gradlew uberJar
+      - aws-cli/setup
+      - run: aws s3 cp ./build/libs/pinkman-uber.jar s3://sars-cov-2-25309b4013524/pinkman/deployments
+
 
 workflows:
-  version: 2
-  workflow:
+  test-deploy:
     jobs:
       - test
+      - deploy-jar:
+          requires:
+            - test
