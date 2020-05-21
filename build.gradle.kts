@@ -1,7 +1,10 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     scala
     application
     id("com.github.maiflai.scalatest") version "0.26"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
 }
 
 repositories {
@@ -43,14 +46,8 @@ application {
     mainClassName = "com.github.discoverai.pinkman.Pinkman"
 }
 
-tasks.register<Jar>("uberJar") {
-    isZip64 = true
-    archiveClassifier.set("uber")
-
-    from(sourceSets.main.get().output)
-
-    dependsOn(configurations.runtimeClasspath)
-    from({
-        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
-    })
+tasks {
+    named<ShadowJar>("shadowJar") {
+        isZip64 = true
+    }
 }

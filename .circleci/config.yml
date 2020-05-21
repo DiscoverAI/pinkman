@@ -38,7 +38,7 @@ jobs:
     steps:
       - checkout
       - restore-gradle-cache
-      - run: ./gradlew clean classes testClasses
+      - run: ./gradlew classes testClasses
       - save-gradle-cache
       - run: ./gradlew check
       - store_test_results:
@@ -52,11 +52,11 @@ jobs:
     steps:
       - checkout
       - restore-gradle-cache
-      - run: ./gradlew clean classes testClasses
+      - run: ./gradlew classes testClasses
       - save-gradle-cache
-      - run: ./gradlew uberJar
+      - run: ./gradlew shadowJar
       - aws-cli/setup
-      - run: aws s3 cp ./build/libs/pinkman-uber.jar s3://sars-cov-2-25309b4013524/pinkman/pinkman-job.jar
+      - run: aws s3 cp ./build/libs/pinkman-all.jar s3://sars-cov-2-25309b4013524/pinkman/pinkman-job.jar
 
 
 workflows:
