@@ -1,3 +1,11 @@
+Parameters:
+  BucketName:
+    Type: String
+    Description: Bucket name of the datalake
+  ProjectName:
+    Type: String
+    Description: Name of the project this datalake belongs to
+
 Resources:
   DatalakeBucket:
     Type: AWS::S3::Bucket
@@ -7,9 +15,9 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: "AES256"
-      BucketName: "sars-cov-2-25309b4013524"
+      BucketName: !Ref BucketName
       Tags:
         - Key: Project
-          Value: "SARS-CoV-2"
+          Value: !Ref ProjectName
       VersioningConfiguration:
         Status: "Enabled"
