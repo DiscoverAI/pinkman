@@ -56,7 +56,7 @@ jobs:
       - save-gradle-cache
       - run: ./gradlew uberJar
       - aws-cli/setup
-      - run: aws s3 cp ./build/libs/pinkman-uber.jar s3://sars-cov-2-25309b4013524/pinkman/deployments
+      - run: aws s3 cp ./build/libs/pinkman-uber.jar s3://sars-cov-2-25309b4013524/pinkman/pinkman-job.jar
 
 
 workflows:
