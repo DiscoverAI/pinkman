@@ -1,0 +1,20 @@
+Parameters:
+  UserName:
+    Type: String
+    Description: Name of the deploy user
+
+Resources:
+  PinkmanDeployKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      Status: "Active"
+      UserName: !Ref UserName
+
+Outputs:
+  DeployAccessKeyId:
+    Description: AccessKeyId of the deploy user
+    Value: !Ref PinkmanDeployKey
+
+  DeploySecretAccessKey:
+    Description: SecretAccessKey of the deploy user
+    Value: !GetAtt PinkmanDeployKey.SecretAccessKey

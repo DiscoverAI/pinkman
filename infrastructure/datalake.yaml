@@ -21,3 +21,10 @@ Resources:
           Value: !Ref ProjectName
       VersioningConfiguration:
         Status: "Enabled"
+
+Outputs:
+  DatalakeARN:
+    Description: ARN of the datalake
+    Value: !GetAtt DatalakeBucket.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-Arn'

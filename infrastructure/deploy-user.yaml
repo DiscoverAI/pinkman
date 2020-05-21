@@ -1,0 +1,40 @@
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Name of the project this resources belongs to
+  UserName:
+    Type: String
+    Description: Name of deploy user
+  DatalakeStackName:
+    Type: String
+    Description: Stack name of the datalake
+
+Resources:
+  PinkmanDeployUser:
+    Type: AWS::IAM::User
+    Properties:
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+      Policies:
+        - PolicyName: write-to-datalake
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource:
+                  - Fn::ImportValue:
+                      !Sub "${DatalakeStackName}-Arn"
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                Resource:
+                  - Fn::Join:
+                      - ""
+                      - - Fn::ImportValue:
+                            !Sub "${DatalakeStackName}-Arn"
+                        - "/*"
+      UserName: !Ref UserName
