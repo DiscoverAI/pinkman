@@ -67,17 +67,17 @@ object Pinkman extends LazyLogging {
   }
 
   def main(args: Array[String]): Unit = {
-    val baseUri = s"s3a://${System.getenv("S3_BUCKET_NAME")}"
+    val baseUri = s"s3a://${args(0)}"
     logger.info("Start loading spark")
     val sparkConf = new SparkConf()
-      .set("fs.s3a.access.key", System.getenv("AWS_ACCESS_KEY_ID"))
-      .set("fs.s3a.secret.key", System.getenv("AWS_SECRET_ACCESS_KEY"))
+//      .set("fs.s3a.access.key", System.getenv("AWS_ACCESS_KEY_ID"))
+//      .set("fs.s3a.secret.key", System.getenv("AWS_SECRET_ACCESS_KEY"))
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     val spark: SparkSession = SparkSession.builder
       .appName("pinkman")
       .config(sparkConf)
       .getOrCreate()
-    val mlflowContext = new MlflowContext(System.getenv("MLFLOW_TRACKING_URI"))
+    val mlflowContext = new MlflowContext(args(1))
     val client = mlflowContext.getClient
     val experimentOpt = client.getExperimentByName(mlFlowExperimentName);
     if (!experimentOpt.isPresent) {
