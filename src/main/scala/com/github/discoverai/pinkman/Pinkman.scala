@@ -9,6 +9,9 @@ import org.mlflow.api.proto.Service.RunStatus
 import org.mlflow.tracking.{ActiveRun, MlflowContext}
 
 object Pinkman extends LazyLogging {
+  val mlFlowExperimentName = "sars-cov-2"
+  val mlFlowRunName = "pinkman"
+
   type BroadcastedDictionary = Broadcast[Map[String, Double]]
   type DictionaryDataset = Dataset[DictionaryEntry]
 
@@ -77,12 +80,12 @@ object Pinkman extends LazyLogging {
       .getOrCreate()
     val mlflowContext = new MlflowContext(System.getenv("MLFLOW_TRACKING_URI"))
     val client = mlflowContext.getClient
-    val experimentOpt = client.getExperimentByName("pinkman");
+    val experimentOpt = client.getExperimentByName(mlFlowExperimentName);
     if (!experimentOpt.isPresent) {
-      client.createExperiment("pinkman")
+      client.createExperiment(mlFlowExperimentName)
     }
-    mlflowContext.setExperimentName("pinkman")
-    val run: ActiveRun = mlflowContext.startRun("run")
+    mlflowContext.setExperimentName(mlFlowExperimentName)
+    val run: ActiveRun = mlflowContext.startRun(mlFlowRunName)
     logger.info("Done loading spark and mlflow")
 
     try {
