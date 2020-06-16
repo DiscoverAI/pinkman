@@ -47,6 +47,7 @@ object Pinkman extends LazyLogging {
       .orderBy(rand())
       .write
       .mode("overwrite")
+      .option("quote", "\u0000")
       .csv(outputPath)
   }
 
