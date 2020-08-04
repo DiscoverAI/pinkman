@@ -1,3 +1,3 @@
-[submodule "okta-aws-portal"]
-	path = okta-aws-portal
-	url = git@github.com:kelseymok/okta-aws-portal.git
+[submodule "assume-role"]
+	path = assume-role
+	url = git@github.com:kelseymok/assume-role.git

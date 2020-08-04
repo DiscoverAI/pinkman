@@ -8,4 +8,3 @@ gradle-app.setting
 .idea
 *.iml
 .env
-okta-config.txt
