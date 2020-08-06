@@ -11,6 +11,12 @@ and `train.csv` and creates a `dictionary.csv` containing the substitution rules
 
 It uses a s3 bucket for storing datasets.
 
+## Get Submodules
+```bash
+git submodule update --init --recursive
+git pull --recurse-submodules && git submodule update --remote
+```
+
 ## Test
 ```bash
 ./gradlew check
@@ -43,6 +49,8 @@ Where
 
 ## Input
 It assumes that there is a moses.csv file lying in the root of your provided datalake bucket.
+
+
 
 ### Example
 moses.csv
