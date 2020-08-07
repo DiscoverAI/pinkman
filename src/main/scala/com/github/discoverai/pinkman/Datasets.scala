@@ -3,7 +3,7 @@ package com.github.discoverai.pinkman
 import com.github.discoverai.pinkman.Pinkman.DictionaryDataset
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql._
-import org.apache.spark.sql.functions.{col, explode, lit, udf}
+import org.apache.spark.sql.functions.{col, explode, lit, udf, size, max}
 
 object Datasets {
   private val smilesColumnName = "SMILES"
@@ -57,6 +57,11 @@ object Datasets {
       .drop("features")
       .withColumnRenamed("stringifiedFeatures", "features")
   }
+
+  def getMaxSequenceLength(normalizedDataset: DataFrame): Int = {
+    normalizedDataset.agg(max(size(col("features")))).head().getInt(0)
+  }
+
 
   def load(spark: SparkSession, datasetFilePath: String): (DataFrame, DataFrame) = {
     val dataset = spark

@@ -206,4 +206,19 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
       actual.collect() should contain theSameElementsAs expected.collect()
     }
   }
+
+  Feature("get maximal sequence length") {
+    Scenario("maximal length of 3") {
+      val givenDataset = Seq(
+        Seq(3.0, 2.0, 4.0),
+        Seq(1.0, 2.0, 4.0),
+        Seq(1.0, 4.0, 1.0),
+      ).toDF("features")
+
+      val actual = Datasets.getMaxSequenceLength(givenDataset)
+      val expected = 3
+
+      actual shouldBe expected
+    }
+  }
 }
