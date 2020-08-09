@@ -5,6 +5,7 @@ plugins {
     application
     id("com.github.maiflai.scalatest") version "0.26"
     id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("com.github.eugenesy.scapegoat") version "0.1.3"
 }
 
 repositories {
@@ -50,4 +51,14 @@ tasks {
     named<ShadowJar>("shadowJar") {
         isZip64 = true
     }
+}
+
+scapegoat {
+    scapegoatVersion = "1.4.4"
+    scalaVersion = "2.12.10"
+    dataDir = "${buildDir}/reports/scapegoat"
+    consoleOutput = true
+    verbose = true
+    reports = listOf("html", "xml")
+    minimalWarnLevel = "info"
 }
