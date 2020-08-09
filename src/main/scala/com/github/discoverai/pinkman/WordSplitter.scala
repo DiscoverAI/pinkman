@@ -23,7 +23,3 @@ class WordSplitter(override val uid: String)
 
   override def copy(extra: ParamMap): WordSplitter = defaultCopy(extra)
 }
-
-object WordSplitter extends DefaultParamsReadable[WordSplitter] {
-  override def load(path: String): WordSplitter = super.load(path)
-}

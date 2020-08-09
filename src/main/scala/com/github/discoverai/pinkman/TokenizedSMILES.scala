@@ -1,3 +1,3 @@
 package com.github.discoverai.pinkman
 
-case class TokenizedSMILES(tokenizedSMILES: Seq[String])
+final case class TokenizedSMILES(tokenizedSMILES: Seq[String])
