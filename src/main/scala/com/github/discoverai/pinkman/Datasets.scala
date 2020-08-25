@@ -62,6 +62,9 @@ object Datasets {
     normalizedDataset.agg(max(size(col("features")))).head().getInt(0)
   }
 
+  def normalizeLength(feature: Seq[Double], length: Int): Seq[Double] = {
+    Seq.fill(length)(0.0).zipAll(feature, 0.0, 0.0).map { case (x,y) => x + y }
+  }
 
   def load(spark: SparkSession, datasetFilePath: String): (DataFrame, DataFrame) = {
     val dataset = spark

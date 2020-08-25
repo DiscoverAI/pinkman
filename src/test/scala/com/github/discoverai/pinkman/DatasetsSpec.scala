@@ -221,4 +221,26 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
       actual shouldBe expected
     }
   }
+
+  Feature("normalise features to configured length") {
+    Scenario("feature with length less than configured length") {
+      val givenFeature = Seq(3.0, 2.0, 4.0)
+      val configuredLength = 10
+
+      val actual = Datasets.normalizeLength(givenFeature, configuredLength)
+      val expected = Seq(3.0, 2.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+
+      actual shouldBe expected
+    }
+
+    Scenario("feature with length equal to configured length") {
+      val givenFeature = Seq(3.0, 2.0, 4.0, 5.0, 6.0, 8.0, 1.0, 2.0, 4.0, 5.0)
+      val configuredLength = 10
+
+      val actual = Datasets.normalizeLength(givenFeature, configuredLength)
+      val expected = Seq(3.0, 2.0, 4.0, 5.0, 6.0, 8.0, 1.0, 2.0, 4.0, 5.0)
+
+      actual shouldBe expected
+    }
+  }
 }
