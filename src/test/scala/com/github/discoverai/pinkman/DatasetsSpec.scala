@@ -114,7 +114,7 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
         "=" -> 5.0,
         "c" -> 3.0,
       ))
-      val smilesLength = 3
+      val smilesLength = spark.sparkContext.broadcast(3)
 
       val actual = Datasets.normalize(givenDataset, givenDictionary, smilesLength)
       val expected = Seq(
@@ -138,7 +138,7 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
         "c" -> 3.0,
         "=" -> 4.0,
       ))
-      val smilesLength = 5
+      val smilesLength = spark.sparkContext.broadcast(5)
 
       val actual = Datasets.normalize(givenDataset, givenDictionary, smilesLength)
       val expected = Seq(
@@ -161,7 +161,7 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
         "c" -> 3.0,
         "=" -> 4.0,
       ))
-      val smilesLength = 5
+      val smilesLength = spark.sparkContext.broadcast(5)
 
       val actual = Datasets.normalize(givenDataset, givenDictionary, smilesLength)
       val expected = Seq(
@@ -211,14 +211,27 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
   }
 
   Feature("get maximal sequence length") {
-    Scenario("maximal length of 3") {
+    Scenario("maximal length of 4") {
       val givenDataset = Seq(
-        Seq(3.0, 2.0, 4.0),
-        Seq(1.0, 2.0, 4.0),
-        Seq(1.0, 4.0, 1.0),
-      ).toDF("features")
+        TokenizedSMILES(Seq("3.0", "2.0", "4.0")),
+        TokenizedSMILES(Seq("1.0", "2.0", "4.0")),
+        TokenizedSMILES(Seq("1.0", "4.0", "1.0", "5.0")),
+      ).toDS()
 
-      val actual = Datasets.getMaxSequenceLength(givenDataset)
+      val actual = Datasets.maxSmilesLength(givenDataset)
+      val expected = 4
+
+      actual shouldBe expected
+    }
+
+    Scenario("maximal length of 3 when all of them are 3") {
+      val givenDataset = Seq(
+        TokenizedSMILES(Seq("3.0", "2.0", "4.0")),
+        TokenizedSMILES(Seq("1.0", "2.0", "4.0")),
+        TokenizedSMILES(Seq("1.0", "4.0", "1.0")),
+      ).toDS()
+
+      val actual = Datasets.maxSmilesLength(givenDataset)
       val expected = 3
 
       actual shouldBe expected
@@ -226,11 +239,12 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
   }
 
   Feature("normalise features to configured length") {
+    val smilesLength = spark.sparkContext.broadcast(10)
+
     Scenario("feature with length less than configured length") {
       val givenFeature = Seq(3.0, 2.0, 4.0)
-      val configuredLength = 10
 
-      val actual = Datasets.padSequence(configuredLength)(givenFeature)
+      val actual = Datasets.padSequence(smilesLength)(givenFeature)
       val expected = Seq(3.0, 2.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
       actual shouldBe expected
@@ -238,9 +252,8 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
 
     Scenario("feature with length equal to configured length") {
       val givenFeature = Seq(3.0, 2.0, 4.0, 5.0, 6.0, 8.0, 1.0, 2.0, 4.0, 5.0)
-      val configuredLength = 10
 
-      val actual = Datasets.padSequence(configuredLength)(givenFeature)
+      val actual = Datasets.padSequence(smilesLength)(givenFeature)
       val expected = Seq(3.0, 2.0, 4.0, 5.0, 6.0, 8.0, 1.0, 2.0, 4.0, 5.0)
 
       actual shouldBe expected

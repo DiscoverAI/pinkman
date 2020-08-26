@@ -11,7 +11,6 @@ import org.mlflow.tracking.{ActiveRun, MlflowContext}
 object Pinkman extends LazyLogging {
   val mlFlowExperimentName = "sars-cov-2"
   val mlFlowRunName = "pinkman"
-  val maxSmilesLength = 57
 
   type BroadcastedDictionary = Broadcast[Map[String, Double]]
   type DictionaryDataset = Dataset[DictionaryEntry]
@@ -97,7 +96,7 @@ object Pinkman extends LazyLogging {
       logger.info("Start tokenizing dataset")
       val tokenizedSMILESTrain = Datasets.tokenize(train)
       val tokenizedSMILESTest = Datasets.tokenize(test)
-      val tokenizedSMILES = tokenizedSMILESTest.union(tokenizedSMILESTrain)
+      val tokenizedSMILES: Dataset[TokenizedSMILES] = tokenizedSMILESTest.union(tokenizedSMILESTrain)
       logger.info("Done tokenizing dataset")
 
       logger.info("Start creating dictionary")
@@ -105,8 +104,11 @@ object Pinkman extends LazyLogging {
       logger.info("Done creating dictionary")
 
       logger.info("Start normalizing dataset")
-      val normalizedTrain = Datasets.normalize(tokenizedSMILESTrain, broadcastedDictionary, maxSmilesLength)
-      val normalizedTest = Datasets.normalize(tokenizedSMILESTest, broadcastedDictionary, maxSmilesLength)
+      val maxSmilesLength = Datasets.maxSmilesLength(tokenizedSMILES)
+      val broadcasedMaxSmilesLength = spark.sparkContext.broadcast(maxSmilesLength)
+
+      val normalizedTrain = Datasets.normalize(tokenizedSMILESTrain, broadcastedDictionary, broadcasedMaxSmilesLength)
+      val normalizedTest = Datasets.normalize(tokenizedSMILESTest, broadcastedDictionary, broadcasedMaxSmilesLength)
       logger.info("Done normalizing dataset")
 
       logger.info("Start persisting datasets and dictionary")

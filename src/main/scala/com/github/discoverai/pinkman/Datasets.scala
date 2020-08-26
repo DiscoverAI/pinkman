@@ -41,9 +41,10 @@ object Datasets {
     }
   }
 
-  def normalize(tokenizedDataset: Dataset[TokenizedSMILES], dictionary: Broadcast[Map[String, Double]], maxSmilesLength: Int): DataFrame = {
+  def normalize(tokenizedDataset: Dataset[TokenizedSMILES], dictionary: Broadcast[Map[String, Double]], maxSmilesLength: Broadcast[Int]): DataFrame = {
     val indexed = udf[Seq[Double], Seq[String]](index(dictionary)(_))
-    val paddedSequence = udf((feature: Seq[Double]) => padSequence(maxSmilesLength)(feature))
+    val paddedSequence = udf(padSequence(maxSmilesLength)(_))
+
     val indexedPaddedDataset = tokenizedDataset
       .withColumn("features", paddedSequence(indexed(col(tokenColumnName))))
       .select("features")
@@ -59,12 +60,12 @@ object Datasets {
       .withColumnRenamed("stringifiedFeatures", "features")
   }
 
-  def getMaxSequenceLength(normalizedDataset: DataFrame): Int = {
-    normalizedDataset.agg(max(size(col("features")))).head().getInt(0)
+  def maxSmilesLength(normalizedDataset: Dataset[TokenizedSMILES]): Int = {
+    normalizedDataset.agg(max(size(col("tokenizedSMILES")))).head().getInt(0)
   }
 
-  def padSequence(maxSmilesLength: Int)(feature: Seq[Double]): Seq[Double] = {
-    Seq.fill(maxSmilesLength)(0.0).zipAll(feature, 0.0, 0.0).map { case (x,y) => x + y }
+  def padSequence(maxSmilesLength: Broadcast[Int])(feature: Seq[Double]): Seq[Double] = {
+    Seq.fill(maxSmilesLength.value)(0.0).zipAll(feature, 0.0, 0.0).map { case (x,y) => x + y }
   }
 
   def load(spark: SparkSession, datasetFilePath: String): (DataFrame, DataFrame) = {
