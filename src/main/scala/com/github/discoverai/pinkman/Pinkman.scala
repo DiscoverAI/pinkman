@@ -105,10 +105,11 @@ object Pinkman extends LazyLogging {
 
       logger.info("Start normalizing dataset")
       val maxSmilesLength = Datasets.maxSmilesLength(tokenizedSMILES)
-      val broadcasedMaxSmilesLength = spark.sparkContext.broadcast(maxSmilesLength)
+      run.logParam("SMILES_length", maxSmilesLength.toString)
+      val broadcastedMaxSmilesLength = spark.sparkContext.broadcast(maxSmilesLength)
 
-      val normalizedTrain = Datasets.normalize(tokenizedSMILESTrain, broadcastedDictionary, broadcasedMaxSmilesLength)
-      val normalizedTest = Datasets.normalize(tokenizedSMILESTest, broadcastedDictionary, broadcasedMaxSmilesLength)
+      val normalizedTrain = Datasets.normalize(tokenizedSMILESTrain, broadcastedDictionary, broadcastedMaxSmilesLength)
+      val normalizedTest = Datasets.normalize(tokenizedSMILESTest, broadcastedDictionary, broadcastedMaxSmilesLength)
       logger.info("Done normalizing dataset")
 
       logger.info("Start persisting datasets and dictionary")
