@@ -41,13 +41,14 @@ object Datasets {
     }
   }
 
-  def normalize(tokenizedDataset: Dataset[TokenizedSMILES], dictionary: Broadcast[Map[String, Double]]): DataFrame = {
+  def normalize(tokenizedDataset: Dataset[TokenizedSMILES], dictionary: Broadcast[Map[String, Double]], maxSmilesLength: Int): DataFrame = {
     val indexed = udf[Seq[Double], Seq[String]](index(dictionary)(_))
-    val indexedDataset = tokenizedDataset
-      .withColumn("features", indexed(col(tokenColumnName)))
+    val paddedSequence = udf((feature: Seq[Double]) => padSequence(maxSmilesLength)(feature))
+    val indexedPaddedDataset = tokenizedDataset
+      .withColumn("features", paddedSequence(indexed(col(tokenColumnName))))
       .select("features")
 
-    indexedDataset
+    indexedPaddedDataset
   }
 
   def stringifyVectors(normalizedDataset: DataFrame): DataFrame = {
@@ -62,8 +63,8 @@ object Datasets {
     normalizedDataset.agg(max(size(col("features")))).head().getInt(0)
   }
 
-  def normalizeLength(feature: Seq[Double], length: Int): Seq[Double] = {
-    Seq.fill(length)(0.0).zipAll(feature, 0.0, 0.0).map { case (x,y) => x + y }
+  def padSequence(maxSmilesLength: Int)(feature: Seq[Double]): Seq[Double] = {
+    Seq.fill(maxSmilesLength)(0.0).zipAll(feature, 0.0, 0.0).map { case (x,y) => x + y }
   }
 
   def load(spark: SparkSession, datasetFilePath: String): (DataFrame, DataFrame) = {

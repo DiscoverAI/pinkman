@@ -11,6 +11,7 @@ import org.mlflow.tracking.{ActiveRun, MlflowContext}
 object Pinkman extends LazyLogging {
   val mlFlowExperimentName = "sars-cov-2"
   val mlFlowRunName = "pinkman"
+  val maxSmilesLength = 57
 
   type BroadcastedDictionary = Broadcast[Map[String, Double]]
   type DictionaryDataset = Dataset[DictionaryEntry]
@@ -104,8 +105,8 @@ object Pinkman extends LazyLogging {
       logger.info("Done creating dictionary")
 
       logger.info("Start normalizing dataset")
-      val normalizedTrain = Datasets.normalize(tokenizedSMILESTrain, broadcastedDictionary)
-      val normalizedTest = Datasets.normalize(tokenizedSMILESTest, broadcastedDictionary)
+      val normalizedTrain = Datasets.normalize(tokenizedSMILESTrain, broadcastedDictionary, maxSmilesLength)
+      val normalizedTest = Datasets.normalize(tokenizedSMILESTest, broadcastedDictionary, maxSmilesLength)
       logger.info("Done normalizing dataset")
 
       logger.info("Start persisting datasets and dictionary")

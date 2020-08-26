@@ -114,12 +114,13 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
         "=" -> 5.0,
         "c" -> 3.0,
       ))
+      val smilesLength = 3
 
-      val actual = Datasets.normalize(givenDataset, givenDictionary)
+      val actual = Datasets.normalize(givenDataset, givenDictionary, smilesLength)
       val expected = Seq(
-        Seq(3.0),
-        Seq(2.0),
-        Seq(5.0),
+        Seq(3.0, 0.0, 0.0),
+        Seq(2.0, 0.0, 0.0),
+        Seq(5.0, 0.0, 0.0),
       ).toDF("features")
 
       actual.collect() should contain theSameElementsAs expected.collect()
@@ -137,12 +138,13 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
         "c" -> 3.0,
         "=" -> 4.0,
       ))
+      val smilesLength = 5
 
-      val actual = Datasets.normalize(givenDataset, givenDictionary)
+      val actual = Datasets.normalize(givenDataset, givenDictionary, smilesLength)
       val expected = Seq(
-        Seq(3.0, 2.0, 4.0),
-        Seq(1.0, 2.0, 4.0),
-        Seq(1.0, 4.0, 1.0),
+        Seq(3.0, 2.0, 4.0, 0.0, 0.0),
+        Seq(1.0, 2.0, 4.0, 0.0, 0.0),
+        Seq(1.0, 4.0, 1.0, 0.0, 0.0),
       ).toDF("features")
 
       actual.collect() should contain theSameElementsAs expected.collect()
@@ -159,12 +161,13 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
         "c" -> 3.0,
         "=" -> 4.0,
       ))
+      val smilesLength = 5
 
-      val actual = Datasets.normalize(givenDataset, givenDictionary)
+      val actual = Datasets.normalize(givenDataset, givenDictionary, smilesLength)
       val expected = Seq(
-        Seq(3.0, 2.0, 4.0),
-        Seq(0.0, 2.0, 4.0),
-        Seq(0.0, 4.0, 0.0),
+        Seq(3.0, 2.0, 4.0, 0.0, 0.0),
+        Seq(0.0, 2.0, 4.0, 0.0, 0.0),
+        Seq(0.0, 4.0, 0.0, 0.0, 0.0),
       ).toDF("features")
 
       actual.collect() should contain theSameElementsAs expected.collect()
@@ -227,7 +230,7 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
       val givenFeature = Seq(3.0, 2.0, 4.0)
       val configuredLength = 10
 
-      val actual = Datasets.normalizeLength(givenFeature, configuredLength)
+      val actual = Datasets.padSequence(configuredLength)(givenFeature)
       val expected = Seq(3.0, 2.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
       actual shouldBe expected
@@ -237,7 +240,7 @@ class DatasetsSpec extends UnitTest with LocalSparkContext {
       val givenFeature = Seq(3.0, 2.0, 4.0, 5.0, 6.0, 8.0, 1.0, 2.0, 4.0, 5.0)
       val configuredLength = 10
 
-      val actual = Datasets.normalizeLength(givenFeature, configuredLength)
+      val actual = Datasets.padSequence(configuredLength)(givenFeature)
       val expected = Seq(3.0, 2.0, 4.0, 5.0, 6.0, 8.0, 1.0, 2.0, 4.0, 5.0)
 
       actual shouldBe expected
