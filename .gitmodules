@@ -1,3 +1,0 @@
-[submodule "assume-role"]
-	path = assume-role
-	url = git@github.com:kelseymok/assume-role.git
