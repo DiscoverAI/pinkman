@@ -28,3 +28,8 @@ Outputs:
     Value: !GetAtt DatalakeBucket.Arn
     Export:
       Name: !Sub '${AWS::StackName}-Arn'
+  DatalakeAddress:
+    Description: DatalakeAddress
+    Value: !Sub "s3://${BucketName}"
+    Export:
+      Name: !Sub '${AWS::StackName}-Address'

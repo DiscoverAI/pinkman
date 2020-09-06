@@ -1,6 +1,11 @@
 project_name = "sars-cov-2"
 bucket_name = "$(project_name)-25309b4013524"
 user_name = "datalake-ci-deploy"
+region = "eu-central-1"
+developer_profile = "tortugas-developer"
+
+now := $(shell date +%s)
+wait_for_status_change=5
 
 .PHONY: deploy-user-key-template-test
 deploy-user-key-template-test:
@@ -39,6 +44,26 @@ datalake:
 		--template-file datalake.yaml \
 		--stack-name "$(project_name)-datalake" \
 		--parameter-overrides BucketName=$(bucket_name) ProjectName=$(project_name)
+
+.PHONY: update-datalake
+update-datalake:
+	aws cloudformation create-change-set \
+		--change-set-name "$(project_name)-datalake-${now}" \
+		--change-set-type UPDATE \
+		--template-body file://./datalake.yaml \
+		--stack-name "$(project_name)-datalake" \
+		--region $(region) \
+		--capabilities CAPABILITY_NAMED_IAM \
+		--profile $(developer_profile) \
+		--parameters ParameterKey=ProjectName,ParameterValue=$(project_name) ParameterKey=BucketName,ParameterValue="$(bucket_name)"
+
+	sleep $(wait_for_status_change)
+
+	aws cloudformation execute-change-set \
+		--change-set-name "$(project_name)-datalake-${now}" \
+		--stack-name "$(project_name)-datalake" \
+		--region $(region) \
+		--profile $(developer_profile)
 
 .PHONY: templates-test
 templates-test: datalake-template-test deploy-user-template-test deploy-user-key-template-test
