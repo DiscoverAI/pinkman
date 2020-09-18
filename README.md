@@ -1,6 +1,7 @@
 # Pinkman
 [![CircleCI](https://circleci.com/gh/DiscoverAI/pinkman.svg?style=shield)](https://circleci.com/gh/DiscoverAI/pinkman)
 [![GitHub license](https://img.shields.io/github/license/DiscoverAI/pinkman)](https://github.com/DiscoverAI/pinkman/blob/master/LICENSE)
+[![Gitter](https://badges.gitter.im/discoverai/community.svg)](https://gitter.im/discoverai/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 > Yeah Mr. White! You really do have a plan! Yeah science!
 >
